@@ -1,4 +1,5 @@
 # Oxygen X-Air V400E Integration for Home Assistant
+Models which is not fully tested but seems that works too: **C200**
 
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Integration-blue?style=for-the-badge&logo=home-assistant)
 ![Protocol](https://img.shields.io/badge/Protocol-Modbus%2FHTTP-orange?style=for-the-badge)
@@ -101,8 +102,8 @@ Accessible mostly via `cmd?GA` (Get All) or specific set commands.
 | **SR0** | Status | 1=On, 0=Off |
 | **SR1** | Current Fan Speed Target | % |
 | **SR2** | Target Temperature | °C |
-| **SR8** | Supply Flow Balance | +/- % |
-| **SR9** | Extract Flow Balance | +/- % |
+| **SR9** | Supply Flow Balance | +/- % |
+| **SR10** | Extract Flow Balance | +/- % |
 | **SR12** | Boost Speed | % |
 | **SR13** | Boost Duration | min |
 | **SR28** | Antifrost Temp Diff | |
