@@ -1,0 +1,259 @@
+#
+sensor:
+  # GR1 - HVAC unit flow
+  - platform: rest
+    name: "HVAC unit flow"
+    resource: "http://192.168.0.XXX/cmd?GR1"
+    scan_interval: 30
+    unit_of_measurement: "%"
+    value_template: "{{ value }}"
+    unique_id: oxygen_hvac_unit_flow
+
+  # GI0 - Supply air temp
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI0"
+    name: "Supply air temp"
+    scan_interval: 30
+    unit_of_measurement: "°C"
+    value_template: "{{ (value | float(0) / 10) | round(1) }}"
+    unique_id: oxygen_supply_air_temp
+
+  # GI1 - Outdoor air temp
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI1"
+    name: "Outdoor air temp"
+    scan_interval: 30
+    timeout: 10
+    unit_of_measurement: "°C"
+    value_template: >
+      {% set val = value | float(0) %}
+      {% if val > 32000 %}
+        {{ ((val - 65536) / 10) | round(1) }}
+      {% else %}
+        {{ (val / 10) | round(1) }}
+      {% endif %}
+    unique_id: oxygen_outdoor_air_temp
+
+  # GI2 - Extract air temp
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI2"
+    name: "Extract air temp"
+    scan_interval: 30
+    unit_of_measurement: "°C"
+    value_template: "{{ (value | float(0) / 10) | round(1) }}"
+    unique_id: oxygen_extract_air_temp
+
+  # GI3 - Extract air humidity
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI3"
+    name: "Extract air humidity"
+    scan_interval: 30
+    unit_of_measurement: "%"
+    device_class: humidity
+    value_template: "{{ (value | float(0) / 10) | round(0) }}"
+    unique_id: oxygen_extract_air_humidity
+
+  # GI4 - Exhaust air temp
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI4"
+    name: "Exhaust air temp"
+    scan_interval: 30
+    unit_of_measurement: "°C"
+    value_template: "{{ (value | float(0) / 10) | round(1) }}"
+    unique_id: oxygen_exhaust_air_temp
+
+  # GI7 - Supply filter pressure
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI7"
+    name: "Supply filter pressure"
+    scan_interval: 30
+    unit_of_measurement: "Pa"
+    value_template: >
+      {% set val = value | float(0) %}
+      {% if val > 32768 %}
+        {{ (val - 65536) | int }}
+      {% else %}
+        {{ val | int }}
+      {% endif %}
+    unique_id: oxygen_supply_filter_pressure
+
+  # GI8 - Extract filter pressure
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI8"
+    name: "Extract filter pressure"
+    scan_interval: 30
+    unit_of_measurement: "Pa"
+    value_template: >
+      {% set val = value | float(0) %}
+      {% if val > 32768 %}
+        {{ (val - 65536) | int }}
+      {% else %}
+        {{ val | int }}
+      {% endif %}
+    unique_id: oxygen_extract_filter_pressure
+
+  # GI25 - Supply fan speed
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI25"
+    name: "Supply fan speed"
+    scan_interval: 30
+    unit_of_measurement: "RPM"
+    value_template: "{{ value }}"
+    unique_id: oxygen_supply_fan_speed_rpm
+
+  # GI26 - Extract fan speed RPM
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI26"
+    name: "Extract fan speed"
+    scan_interval: 30
+    unit_of_measurement: "RPM"
+    value_template: "{{ value }}"
+    unique_id: oxygen_extract_fan_speed_rpm
+
+  # GI30 - Bypass status
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI30"
+    name: "Bypass status"
+    scan_interval: 30
+    value_template: >
+      {% if value | int == 100 %}
+        Closed
+      {% else %}
+        Open
+      {% endif %}
+    unique_id: oxygen_bypass_status
+    icon: mdi:road-variant
+
+  # GI31 - Preheater 
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI31"
+    name: "Preheater "
+    unique_id: oxygen_preheater
+    scan_interval: 10
+    unit_of_measurement: "%"
+    value_template: "{{ value }}"
+    icon: mdi:heating-coil
+
+  # GI57 - Rotorius V
+  - platform: rest
+    resource: "http://192.168.0.XXX/cmd?GI57"
+    name: "HVAC unit voltage"
+    scan_interval: 30
+    unit_of_measurement: "V"
+    value_template: "{{ value }}"
+    unique_id: oxygen_hvac_unit_voltage
+
+  # Integration: Watts -> kWh (source must be power sensor in W)
+  - platform: integration
+    source: sensor.fans_power
+    name: "Fans Energy Total"
+    unique_id: oxygen_fans_energy_total_kwh
+    unit_prefix: k
+    round: 2
+    method: left
+
+  - platform: integration
+    source: sensor.preheater_power
+    name: "Preheater Energy Total"
+    unique_id: oxygen_preheater_energy_total_kwh
+    unit_prefix: k
+    round: 2
+    method: left
+
+  - platform: integration
+    source: sensor.total_power
+    name: "Total Energy"
+    unique_id: oxygen_energy_total_kwh
+    unit_prefix: k
+    round: 2
+    method: left
+
+template:
+  - sensor:
+      - name: "HVAC efficiency"
+        unit_of_measurement: "%"
+        icon: mdi:leaf
+        state: >
+          {% set t_outdoor = states('sensor.outdoor_air_temp') | float(0) %}
+          {% set t_supply = states('sensor.supply_air_temp') | float(0) %}
+          {% set t_extract = states('sensor.extract_air_temp') | float(0) %}
+          
+          {# Logic fix: Check difference between EXTRACT and OUTDOOR air #}
+          {# We use 'abs' (absolute value) to support both Winter (heating) and Summer (cooling) modes #}
+          {% if (t_extract - t_outdoor) | abs > 1 %}
+            
+            {# Formula: (Supply - Outdoor) / (Extract - Outdoor) * 100 #}
+            {% set eff = ((t_supply - t_outdoor) / (t_extract - t_outdoor)) * 100 %}
+            
+            {# Clamp values between 0% and 99% to avoid erroneous spikes #}
+            {% if eff > 99 %} 99
+            {% elif eff < 0 %} 0
+            {% else %} {{ eff | round(0) }}
+            {% endif %}
+            
+          {% else %}
+            0
+          {% endif %}
+        unique_id: oxygen_hvac_efficiency
+
+  - sensor:
+      # --- FAN POWER (W) – measured interpolation; source for integration → kWh
+      # Measured: 30%=19W, 50%=38W, 75%=85W, 100%=176W
+      - name: "Fans Power"
+        unique_id: oxygen_fans_power
+        unit_of_measurement: "W"
+        device_class: power
+        state: >
+          {% set flow = states('sensor.hvac_unit_flow') | float(0) %}
+          {% if flow <= 0 %}
+            5
+          {% elif flow <= 30 %}
+            {{ (5 + (flow * 0.47)) | round(0) }}
+          {% elif flow <= 50 %}
+            {{ (19 + ((flow - 30) * 0.95)) | round(0) }}
+          {% elif flow <= 75 %}
+            {{ (38 + ((flow - 50) * 1.88)) | round(0) }}
+          {% else %}
+            {{ (85 + ((flow - 75) * 3.64)) | round(0) }}
+          {% endif %}
+
+      # --- PREHEATER POWER (W) – preheater % × 2000W max
+      - name: "Preheater Power"
+        unique_id: oxygen_preheater_power
+        unit_of_measurement: "W"
+        device_class: power
+        state: >
+          {% set level = states('sensor.preheater') | float(0) %}
+          {{ ((level / 100) * 2000) | round(0) }}
+
+      # --- TOTAL SYSTEM POWER (W)
+      - name: "Total Power"
+        unique_id: oxygen_total_power
+        unit_of_measurement: "W"
+        device_class: power
+        state: >
+          {{ states('sensor.fans_power') | float(0) + states('sensor.preheater_power') | float(0) }}
+
+  - fan:
+      - name: "HVAC fan control"
+        unique_id: oxygen_hvac_fan_control
+        state: "{{ states('sensor.hvac_unit_flow') | int(0) > 0 }}"
+        percentage: "{{ states('sensor.hvac_unit_flow') | int(0) }}"
+        speed_count: 20
+        turn_on:
+          action: shell_command.oxygen_hvac_fan_control
+          data:
+            flow: 30
+        turn_off:
+          action: shell_command.oxygen_hvac_fan_control
+          data:
+            flow: 0
+        set_percentage:
+          action: shell_command.oxygen_hvac_fan_control
+          data:
+            flow: "{{ percentage }}"
+
+shell_command:
+  oxygen_hvac_fan_control: "curl -X GET 'http://192.168.0.XXX/cmd?flowset={{ flow }}'"
+
+

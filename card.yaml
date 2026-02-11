@@ -1,0 +1,145 @@
+type: vertical-stack
+cards:
+  - type: tile
+    entity: fan.oxygen_hvac_fan_control
+    fill_container: false
+    show_entity_picture: false
+    hide_state: false
+    vertical: false
+    name: HVAC flow speed
+    features:
+      - type: fan-speed
+  - square: false
+    type: grid
+    columns: 2
+    cards:
+      - type: tile
+        entity: sensor.outdoor_air_temp
+        name: Outdoor air
+        icon: mdi:thermometer-minus
+        color: blue
+        show_entity_picture: false
+        hide_state: false
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.extract_air_temp
+        name: Extract air
+        icon: mdi:home-thermometer
+        color: orange
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.exhaust_air_temp
+        name: Exhaust air
+        icon: mdi:weather-windy
+        color: grey
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.supply_air_temp
+        name: Supply air
+        icon: mdi:air-filter
+        color: teal
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.oxygen_hvac_efficiency
+        icon: mdi:leaf
+        color: green
+        hide_state: false
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.extract_air_humidity
+        name: Extract air humidity
+        icon: mdi:water-percent
+        color: green
+        hide_state: false
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.hvac_unit_flow
+        icon: mdi:speedometer
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.oxygen_hvac_unit_voltage
+        icon: mdi:rotate-3d-variant
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.oxygen_extract_fan_speed_rpm
+        icon: mdi:fan-chevron-up
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.oxygen_supply_fan_speed_rpm
+        icon: mdi:fan-chevron-down
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.extract_air_filter_pressure
+        name: Extract air filter pressure
+        icon: mdi:rotate-3d-variant
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.supply_air_filter_pressure
+        name: Supply air filter pressure
+        icon: mdi:rotate-3d-variant
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.bypass_status
+        icon: mdi:rotate-3d-variant
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.preheater
+        name: Preheater %
+        icon: mdi:heating-coil
+        color: red
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.total_power
+        name: HVAC Current power
+        icon: mdi:flash
+        color: amber
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.total_energy
+        name: HVAC today
+        icon: mdi:chart-line
+        color: green
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.preheater_power
+        name: Preheater power
+        icon: mdi:lightning-bolt
+        color: red
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.preheater_energy_total
+        name: Preheater today
+        icon: mdi:chart-line
+        color: deep-orange
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.fans_power
+        name: Fans power
+        icon: mdi:hvac
+        color: blue
+        vertical: false
+        features_position: bottom
+      - type: tile
+        entity: sensor.fans_energy_total
+        name: Fans Today
+        icon: mdi:chart-line
+        color: light-blue
+        vertical: false
